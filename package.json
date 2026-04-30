@@ -1,0 +1,32 @@
+{
+  "name": "contract-analyser",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
+    "@supabase/supabase-js": "^2.105.1",
+    "multer": "^2.1.1",
+    "next": "^14.2.29",
+    "pdf-parse": "^2.4.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "resend": "^6.12.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "eslint": "^9",
+    "eslint-config-next": "^14.2.29",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
