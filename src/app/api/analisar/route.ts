@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
               text: `You are a senior attorney at a top-tier international law firm. Analyse the attached contract and produce a structured legal report.
 
 STRICT FORMATTING RULES — follow exactly:
+- Start the report with: **Legal report:** [contract title in plain text, not bold]
 - NEVER use markdown tables. Tables are forbidden.
 - Use bullet points (starting with -) for ALL lists and structured content.
 - The only emoji allowed throughout the report is \u26a0\ufe0f for flags and warnings.

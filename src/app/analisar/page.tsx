@@ -85,7 +85,7 @@ export default function Analisar() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Contract Analyser App App
+            Contract Analyser App
           </h1>
           <p className="text-gray-400 text-xs">
             AI-powered contract analysis &middot; Built by Marco Costa &middot; For portfolio demonstration purposes
@@ -186,12 +186,17 @@ export default function Analisar() {
                   Generated on {new Date().toLocaleString('en-GB')}
                 </p>
               </div>
-              <button
-                onClick={() => { setAnalysis(''); setFile(null) }}
-                className="text-xs text-gray-400 hover:text-gray-600 underline"
-              >
-                New analysis
-              </button>
+              <div className="flex gap-4 items-center">
+                <Link href="/" className="text-xs text-gray-400 hover:text-gray-600 underline">
+                  &larr; Home
+                </Link>
+                <button
+                  onClick={() => { setAnalysis(''); setFile(null) }}
+                  className="text-xs text-gray-400 hover:text-gray-600 underline"
+                >
+                  New analysis
+                </button>
+              </div>
             </div>
 
             {/* Markdown rendered result */}
