@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Contract Analyser App
 
-## Getting Started
+A full-stack web application that allows users to upload contract PDFs and receive a structured AI-powered legal analysis. Built as a portfolio demonstration of legal engineering and software development skills.
 
-First, run the development server:
+**Live demo:** [contract-analyser-iota.vercel.app](https://contract-analyser-iota.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## What it does
+
+1. User submits a professional email address
+2. App sends a one-time access code via email
+3. User uploads a contract PDF and submits it for analysis
+4. Claude (Anthropic) reads the PDF natively and generates a structured legal report
+5. Report is generated as a PDF and sent to the user by email
+6. A one-page technical overview of the app is included as a second attachment
+
+---
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router, Server Components, API Routes) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| AI | Anthropic Claude API (claude-opus-4-5) |
+| Email | Resend |
+| Database | Supabase (PostgreSQL) |
+| File storage | Supabase Storage |
+| PDF generation | jsPDF |
+| Deployment | Vercel |
+
+---
+
+## Key features
+
+- Access control via professional email + one-time access code
+- Email domain validation — blocks personal email providers (Gmail, Hotmail, Yahoo, etc.)
+- Native PDF reading by Claude — no intermediate text extraction
+- Structured legal analysis across 8 sections
+- Automatic PDF report generation and email delivery to user
+- Usage limits enforced per access code (1 analysis per visit)
+- Automated data retention — analyses deleted after 3 days, access codes after 30 days
+- GDPR-compliant Privacy Policy with AI Act compliance section
+- Admin panel with usage tracking
+
+---
+
+## Application flow
+
+```
+User (email) → Resend (sends access code) → Supabase DB (stores code)
+     ↓
+User (access code + PDF) → Next.js API → Supabase DB (validates code)
+                                       → Anthropic API (Claude analyses PDF)
+                                                ↓
+                                          jsPDF (generates report)
+                                                ↓
+                                      Resend (emails PDF to user)
+                                                ↓
+                               Supabase Storage + DB (stores data)
+                                                ↓
+                               Vercel cron (deletes data after 3/30 days)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Legal analysis structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Each analysis covers:
 
-## Learn More
+1. Executive summary
+2. Parties involved
+3. Main obligations
+4. Termination clauses
+5. Liability
+6. Risk register (High / Medium / Low)
+7. Overall risk assessment
+8. Recommended improvements
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Install dependencies
+npm install
 
-## Deploy on Vercel
+# Add environment variables
+cp .env.example .env.local
+# Fill in: ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY
+#          RESEND_API_KEY, OPERATOR_EMAIL, NEXT_PUBLIC_APP_URL, ADMIN_PASSWORD
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Run locally
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## About
+
+Built by **Marco Costa** — Legal Engineer  
+For portfolio and recruitment purposes. Not a commercial product.
