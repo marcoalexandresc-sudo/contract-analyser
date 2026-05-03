@@ -1,6 +1,24 @@
-path = r"C:\Projetos\contract-analyser\src\app\page.tsx"
+import os
 
-content = r"""'use client'
+HEADER = '''        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Contract Analyser App
+          </h1>
+          <p className="text-gray-400 text-xs">
+            AI-powered
+          </p>
+        </div>'''
+
+FOOTER = '''        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+          <p className="text-xs text-gray-400">Built by Marco Costa</p>
+          <Link href="/privacy-policy" className="text-xs text-gray-400 hover:text-gray-600 underline">Privacy Policy</Link>
+        </div>'''
+
+# ============================================================
+# page.tsx (home)
+# ============================================================
+path1 = r"C:\Projetos\contract-analyser\src\app\page.tsx"
+content1 = r"""'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -13,34 +31,19 @@ export default function Home() {
   const [error, setError] = useState('')
 
   async function handleSubmit() {
-    if (!email) {
-      setError('Please enter your professional email address.')
-      return
-    }
-    if (!consent) {
-      setError('Please accept the Privacy Policy to continue.')
-      return
-    }
-
+    if (!email) { setError('Please enter your professional email address.'); return }
+    if (!consent) { setError('Please accept the Privacy Policy to continue.'); return }
     setLoading(true)
     setError('')
-
     try {
       const res = await fetch('/api/solicitar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       })
-
       const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong. Please try again.')
-        return
-      }
-
+      if (!res.ok) { setError(data.error || 'Something went wrong. Please try again.'); return }
       setSuccess(true)
-
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
@@ -52,18 +55,11 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10 text-center">
-          <div className="text-5xl mb-4">\ud83d\udce8</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            Check your inbox
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Check your inbox</h2>
           <p className="text-gray-500 text-sm mb-6">
-            We&apos;ve sent your access code to <strong>{email}</strong>.
-            Please check your inbox and follow the instructions.
+            We&apos;ve sent your access code to <strong>{email}</strong>. Please check your inbox and follow the instructions.
           </p>
-          <Link
-            href="/acesso"
-            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors text-center"
-          >
+          <Link href="/acesso" className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors text-center">
             Enter Access Code &rarr;
           </Link>
         </div>
@@ -74,21 +70,13 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10">
-
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Contract Analyser App
-          </h1>
-          <p className="text-gray-400 text-xs">
-            AI-powered contract analysis
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Contract Analyser App</h1>
+          <p className="text-gray-400 text-xs">AI-powered</p>
         </div>
-
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Professional email address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Professional email address</label>
             <input
               type="email"
               value={email}
@@ -98,54 +86,142 @@ export default function Home() {
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
           <div className="flex items-start gap-3 mt-2">
-            <input
-              type="checkbox"
-              id="consent"
-              checked={consent}
-              onChange={e => setConsent(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600"
-            />
+            <input type="checkbox" id="consent" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600" />
             <label htmlFor="consent" className="text-xs text-gray-500 leading-relaxed">
               I have read and agree to the{' '}
-              <Link href="/privacy-policy" className="text-blue-500 underline" target="_blank">
-                Privacy Policy
-              </Link>
-              . I understand that submitted documents are processed by Anthropic Claude (USA)
-              and stored securely on Supabase servers in the EU (Ireland).
+              <Link href="/privacy-policy" className="text-blue-500 underline" target="_blank">Privacy Policy</Link>
+              . I understand that submitted documents are processed by Anthropic Claude (USA) and stored securely on Supabase servers in the EU (Ireland).
             </label>
           </div>
-
-          {error && (
-            <p className="text-red-500 text-xs">{error}</p>
-          )}
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors mt-2"
-          >
+          {error && <p className="text-red-500 text-xs">{error}</p>}
+          <button onClick={handleSubmit} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors mt-2">
             {loading ? 'Sending...' : 'Request Access \u2192'}
           </button>
         </div>
-
         <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-          <p className="text-xs text-gray-400">
-            Built by Marco Costa &middot; For portfolio demonstration purposes
-          </p>
-          <p className="text-xs text-gray-300 mt-1">
-            This tool does not provide legal advice
-          </p>
+          <p className="text-xs text-gray-400">Built by Marco Costa</p>
+          <Link href="/privacy-policy" className="text-xs text-gray-400 hover:text-gray-600 underline">Privacy Policy</Link>
         </div>
-
       </div>
     </main>
   )
 }
 """
+with open(path1, 'w', encoding='utf-8') as f:
+    f.write(content1)
+print("page.tsx reescrito.")
 
-with open(path, 'w', encoding='utf-8') as f:
-    f.write(content)
+# ============================================================
+# acesso/page.tsx
+# ============================================================
+path2 = r"C:\Projetos\contract-analyser\src\app\acesso\page.tsx"
+content2 = r"""'use client'
 
-print("page.tsx reescrito com sucesso.")
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+
+export default function Acesso() {
+  const [code, setCode] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  async function handleSubmit() {
+    if (!code) { setError('Please enter your access code.'); return }
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        if (data.error === 'limit_reached') {
+          setError('This code has already been used for one analysis. If you would like to see more, please get in touch.')
+          return
+        }
+        setError(data.error || 'Invalid access code. Please check and try again.')
+        return
+      }
+      sessionStorage.setItem('access_code', code.toUpperCase().trim())
+      sessionStorage.setItem('email', data.email)
+      sessionStorage.setItem('company', data.company)
+      router.push('/analisar')
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Contract Analyser App</h1>
+          <p className="text-gray-400 text-xs">AI-powered</p>
+        </div>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-500 text-center">Enter the access code sent to your email address.</p>
+          <input
+            type="text"
+            value={code}
+            onChange={e => setCode(e.target.value.toUpperCase())}
+            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+            placeholder="XXXX-XXXX"
+            maxLength={9}
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 text-center text-lg font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {error && (
+            <div className="text-sm p-4 rounded-xl text-red-500">{error}</div>
+          )}
+          <button onClick={handleSubmit} disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
+            {loading ? 'Verifying...' : 'Access \u2192'}
+          </button>
+        </div>
+        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+          <p className="text-xs text-gray-400">Built by Marco Costa</p>
+          <Link href="/privacy-policy" className="text-xs text-gray-400 hover:text-gray-600 underline">Privacy Policy</Link>
+        </div>
+      </div>
+    </main>
+  )
+}
+"""
+with open(path2, 'w', encoding='utf-8') as f:
+    f.write(content2)
+print("acesso/page.tsx reescrito.")
+
+# ============================================================
+# analisar/page.tsx — fix disclaimer duplicado + header/footer
+# ============================================================
+path3 = r"C:\Projetos\contract-analyser\src\app\analisar\page.tsx"
+with open(path3, 'r', encoding='utf-8') as f:
+    content3 = f.read()
+
+# Fix header title
+content3 = content3.replace(
+    '<h1 className="text-2xl font-bold text-gray-900 mb-1">\n            Contract Analyser App\n          </h1>\n          <p className="text-gray-400 text-xs">\n            AI-powered contract analysis &middot; Built by Marco Costa &middot; For portfolio demonstration purposes\n          </p>',
+    '<h1 className="text-2xl font-bold text-gray-900 mb-1">\n            Contract Analyser App\n          </h1>\n          <p className="text-gray-400 text-xs">\n            AI-powered\n          </p>'
+)
+
+# Fix footer
+content3 = content3.replace(
+    '<div className="mt-8 text-center">\n          <p className="text-xs text-gray-400">\n            Built by Marco Costa &middot; Legal Engineer Portfolio &middot;{\' \'}\n            <Link href="/privacy-policy" className="underline">Privacy Policy</Link>\n          </p>\n        </div>',
+    '<div className="mt-8 text-center">\n          <p className="text-xs text-gray-400">Built by Marco Costa</p>\n          <Link href="/privacy-policy" className="text-xs text-gray-400 hover:text-gray-600 underline">Privacy Policy</Link>\n        </div>'
+)
+
+# Remove disclaimer from Claude output (keep only the hardcoded one)
+content3 = content3.replace(
+    '                ⚠️ <strong>Disclaimer:</strong>',
+    '                <strong>Disclaimer:</strong>'
+)
+
+with open(path3, 'w', encoding='utf-8') as f:
+    f.write(content3)
+print("analisar/page.tsx actualizado.")
+print("Todos os ficheiros actualizados.")
