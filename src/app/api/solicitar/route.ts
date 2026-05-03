@@ -5,8 +5,15 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const BLOCKED_DOMAINS = [
-  'hotmail.com', 'yahoo.com', 'outlook.com',
-  'live.com', 'sapo.pt', 'iol.pt', 'mail.com'
+  'gmail.com', 'googlemail.com',
+  'hotmail.com', 'hotmail.co.uk', 'hotmail.fr',
+  'yahoo.com', 'yahoo.co.uk', 'yahoo.fr', 'yahoo.es',
+  'outlook.com', 'outlook.pt',
+  'live.com', 'live.co.uk',
+  'icloud.com', 'me.com', 'mac.com',
+  'sapo.pt', 'iol.pt', 'mail.com',
+  'protonmail.com', 'proton.me',
+  'aol.com', 'msn.com'
 ]
 
 function generateCode(): string {
@@ -58,12 +65,18 @@ export async function POST(request: NextRequest) {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 24px;">
 
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
-            <div style="width: 32px; height: 32px; background: #1d4ed8; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;">
-              <span style="font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; color: white; letter-spacing: 1px;">CA</span>
-            </div>
-            <span style="font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; color: #111827;">Contract Analyser</span>
-          </div>
+          <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6; width: 100%;">
+            <tr>
+              <td style="width: 40px; vertical-align: middle;">
+                <table cellpadding="0" cellspacing="0" border="0" style="width: 32px; height: 32px; background: #1d4ed8; border-radius: 6px;">
+                  <tr>
+                    <td style="text-align: center; vertical-align: middle; font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; color: white; letter-spacing: 1px;">CA</td>
+                  </tr>
+                </table>
+              </td>
+              <td style="vertical-align: middle; padding-left: 10px; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; color: #111827;">Contract Analyser</td>
+            </tr>
+          </table>
 
           <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">Hi,</p>
 
