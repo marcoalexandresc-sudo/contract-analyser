@@ -8,13 +8,13 @@ export default function PrivacyPolicy() {
         {/* Header */}
         <div className="mb-8">
           <Link href="/" className="text-xs text-blue-500 hover:underline">
-            ← Back to Contract Analyser
+            &larr; Back to Contract Analyser
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-4 mb-1">
             Privacy Policy
           </h1>
           <p className="text-xs text-gray-400">
-            Contract Analyser · Demo Application · Last updated: 30 April 2026
+            Contract Analyser &middot; Demo Application &middot; Last updated: 30 April 2026
           </p>
         </div>
 
@@ -48,7 +48,6 @@ export default function PrivacyPolicy() {
             <p className="font-medium text-gray-800 mb-1 mt-3">Document data</p>
             <ul className="list-disc list-inside space-y-1 text-gray-600 ml-2">
               <li>PDF file of submitted contracts</li>
-              <li>Text content extracted from submitted contracts</li>
               <li>AI-generated analysis results</li>
             </ul>
             <p className="font-medium text-gray-800 mb-1 mt-3">Technical data</p>
@@ -63,10 +62,19 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-base font-bold text-gray-900 mb-3">3. How We Use Your Data</h2>
             <p>Your data is used exclusively to:</p>
-            <ul className="list-disc list-inside space-y-1 text-gray-600 ml-2 mt-2">
-              <li>Generate and deliver your access code</li>
-              <li>Provide AI-assisted contract analysis</li>
-              <li>Maintain access logs for security purposes</li>
+            <ul className="list-disc list-inside space-y-2 text-gray-600 ml-2 mt-2">
+              <li>
+                Generate and deliver your access code{' '}
+                <span className="text-gray-400 text-xs">(legal basis: performance of a service requested by the data subject)</span>
+              </li>
+              <li>
+                Provide AI-assisted contract analysis{' '}
+                <span className="text-gray-400 text-xs">(legal basis: consent)</span>
+              </li>
+              <li>
+                Maintain access logs for security purposes{' '}
+                <span className="text-gray-400 text-xs">(legal basis: legitimate interests of the operator)</span>
+              </li>
             </ul>
             <p className="mt-2">
               We do not sell, rent, or share your data with any third party for commercial purposes.
@@ -84,7 +92,7 @@ export default function PrivacyPolicy() {
               in the United States.
             </p>
             <p className="mt-2">
-              Anthropic's privacy policy is available at:{' '}
+              Anthropic&apos;s privacy policy is available at:{' '}
               <a href="https://www.anthropic.com/privacy" target="_blank" className="text-blue-500 underline">
                 anthropic.com/privacy
               </a>
@@ -97,9 +105,10 @@ export default function PrivacyPolicy() {
             <p className="font-medium text-gray-800 mb-1 mt-3">Operator Notifications</p>
             <p>
               For quality assurance purposes, the operator receives an email notification upon
-              each completed analysis. This notification includes the AI-generated analysis result
-              and the professional email address associated with the access code. It does not
-              include the original contract file. By using this application, you consent to
+              each completed analysis. This notification includes the professional email address
+              and organisation domain associated with the access code, the date and time of the
+              analysis, and the access code used. It does not include the original contract file
+              or the AI-generated analysis result. By using this application, you consent to
               this notification.
             </p>
           </section>
@@ -117,10 +126,9 @@ export default function PrivacyPolicy() {
                 </thead>
                 <tbody>
                   {[
-                    ['Professional email address', '30 days from last access'],
+                    ['Professional email address', 'Up to 30 days from last access'],
                     ['Access logs', '30 days from last access'],
                     ['Submitted contract (PDF)', '3 days from submission'],
-                    ['Extracted contract text', '3 days from submission'],
                     ['AI-generated analysis', '3 days from submission'],
                   ].map(([data, retention], i) => (
                     <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
@@ -133,7 +141,8 @@ export default function PrivacyPolicy() {
             </div>
             <p className="mt-3 text-gray-500 text-xs">
               All data is permanently and irreversibly deleted upon expiry of the applicable
-              retention period.
+              retention period. Email addresses associated with completed analyses may be deleted
+              earlier (within 3 days) as part of the analysis record.
             </p>
           </section>
 
@@ -142,12 +151,13 @@ export default function PrivacyPolicy() {
             <h2 className="text-base font-bold text-gray-900 mb-3">6. Your Rights Under GDPR</h2>
             <p>Under Regulation (EU) 2016/679, you have the right to:</p>
             <ul className="list-disc list-inside space-y-1 text-gray-600 ml-2 mt-2">
-              <li><strong>Access</strong> — obtain a copy of your personal data</li>
-              <li><strong>Rectification</strong> — request correction of inaccurate data</li>
-              <li><strong>Erasure</strong> — request immediate deletion of your data</li>
-              <li><strong>Restriction</strong> — request that we limit processing of your data</li>
-              <li><strong>Portability</strong> — receive your data in a structured, machine-readable format</li>
-              <li><strong>Object</strong> — object to processing based on legitimate interests</li>
+              <li><strong>Access</strong> &mdash; obtain a copy of your personal data</li>
+              <li><strong>Rectification</strong> &mdash; request correction of inaccurate data</li>
+              <li><strong>Erasure</strong> &mdash; request immediate deletion of your data</li>
+              <li><strong>Restriction</strong> &mdash; request that we limit processing of your data</li>
+              <li><strong>Portability</strong> &mdash; receive your data in a structured, machine-readable format</li>
+              <li><strong>Object</strong> &mdash; object to processing based on legitimate interests</li>
+              <li><strong>Withdrawal of consent</strong> &mdash; withdraw your consent at any time without affecting the lawfulness of processing carried out before withdrawal</li>
             </ul>
             <p className="mt-2">
               To exercise any of these rights, contact us at{' '}
@@ -170,7 +180,7 @@ export default function PrivacyPolicy() {
               <li>All outputs are clearly identified as AI-generated</li>
               <li>This tool does not make autonomous legal decisions</li>
               <li>
-                All AI-generated outputs are intended to assist the recipient's own review
+                All AI-generated outputs are intended to assist the recipient&apos;s own review
                 and must be independently verified. The operator does not review or validate
                 individual outputs prior to delivery.
               </li>
@@ -230,7 +240,7 @@ export default function PrivacyPolicy() {
         {/* Back link */}
         <div className="mt-6 text-center">
           <Link href="/" className="text-xs text-gray-400 hover:text-gray-600 underline">
-            ← Back to Contract Analyser
+            &larr; Back to Contract Analyser
           </Link>
         </div>
 
