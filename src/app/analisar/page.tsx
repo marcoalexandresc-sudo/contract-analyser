@@ -62,7 +62,7 @@ export default function Analisar() {
 
       if (!res.ok) {
         if (data.error === 'limit_reached') {
-          setError('Hey there! Since I\'m the one paying for Claude\'s tokens, I\'ve limited this to 1 analysis per visit. \uD83D\uDE04 If you\'d like to see more, you know where to find me. \u2014 Marco Costa')
+          setError('limit_reached')
           return
         }
         setError(data.error || 'Something went wrong. Please try again.')
@@ -148,11 +148,17 @@ export default function Analisar() {
 
             {error && (
               <div className={`mt-4 text-sm p-4 rounded-xl ${
-                error.includes('Hey there')
+                error === 'limit_reached'
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-red-500'
               }`}>
-                {error}
+                {error === 'limit_reached' ? (
+                  <span>
+                    Hi, I&apos;ve limited this to 1 analysis per visit. 😄 If you&apos;d like to see more, you know where to reach me!
+                    <br /><br />
+                    Best,<br />Marco Costa
+                  </span>
+                ) : error}
               </div>
             )}
 

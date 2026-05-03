@@ -1,611 +1,73 @@
 import os
 
-solicitar_path = r"C:\Projetos\contract-analyser\src\app\api\solicitar\route.ts"
-solicitar_content = r"""import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import { Resend } from 'resend'
+# ─────────────────────────────────────────────
+# FICHEIRO 1: analisar/page.tsx — mensagem do limite
+# ─────────────────────────────────────────────
+page_path = r"C:\Projetos\contract-analyser\src\app\analisar\page.tsx"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+with open(page_path, 'r', encoding='utf-8') as f:
+    content = f.read()
 
-const BLOCKED_DOMAINS = [
-  'hotmail.com', 'yahoo.com', 'outlook.com',
-  'live.com', 'sapo.pt', 'iol.pt', 'mail.com'
-]
+old = r"""          setError('Hey there! Since I\'m the one paying for Claude\'s tokens, I\'ve limited this to 1 analysis per visit. \uD83D\uDE04 If you\'d like to see more, you know where to find me. \u2014 Marco Costa')"""
 
-function generateCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  const part1 = Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-  const part2 = Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-  return `${part1}-${part2}`
-}
+new = r"""          setError('limit_reached')"""
 
-export async function POST(request: NextRequest) {
-  try {
-    const { email } = await request.json()
+content = content.replace(old, new)
 
-    if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: 'Invalid email.' }, { status: 400 })
-    }
+# Corrigir também o estilo e o render da mensagem de limite
+old2 = r"""            <div className={`mt-4 text-sm p-4 rounded-xl ${
+                error.includes('Hey there')
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-red-500'
+              }`}>
+                {error}
+              </div>"""
 
-    const domain = email.split('@')[1].toLowerCase()
+new2 = r"""            <div className={`mt-4 text-sm p-4 rounded-xl ${
+                error === 'limit_reached'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-red-500'
+              }`}>
+                {error === 'limit_reached' ? (
+                  <span>
+                    Hi, I&apos;ve limited this to 1 analysis per visit. 😄 If you&apos;d like to see more, you know where to reach me!
+                    <br /><br />
+                    Best,<br />Marco Costa
+                  </span>
+                ) : error}
+              </div>"""
 
-    if (BLOCKED_DOMAINS.includes(domain)) {
-      return NextResponse.json(
-        { error: 'Please use your professional email address.' },
-        { status: 400 }
-      )
-    }
+content = content.replace(old2, new2)
 
-    const company = domain.split('.')[0]
+with open(page_path, 'w', encoding='utf-8') as f:
+    f.write(content)
+print(f"OK: {page_path}")
 
-    const { data: existing } = await supabaseAdmin
-      .from('access_codes')
-      .select('code')
-      .eq('email', email)
-      .eq('is_active', true)
-      .single()
+# ─────────────────────────────────────────────
+# FICHEIRO 2: analisar/route.ts — fix [!] duplicado
+# ─────────────────────────────────────────────
+route_path = r"C:\Projetos\contract-analyser\src\app\api\analisar\route.ts"
 
-    let code = existing?.code
+with open(route_path, 'r', encoding='utf-8') as f:
+    content = f.read()
 
-    if (!code) {
-      code = generateCode()
-      await supabaseAdmin
-        .from('access_codes')
-        .insert({ code, email, company })
-    }
-
-    await resend.emails.send({
-      from: 'Contract Analyser <contractanalyzer@lawper.pt>',
-      to: email,
-      subject: 'Your access code',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 24px;">
-
-          <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">Hi,</p>
-
-          <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">Here is your access code:</p>
-
-          <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 24px; text-align: center; margin: 0 0 16px;">
-            <span style="font-size: 18px; font-weight: 700; letter-spacing: 5px; color: #1d4ed8; font-family: 'Courier New', monospace;">
-              ${code}
-            </span>
-          </div>
-
-          <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">
-            Enter this code at
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/acesso" style="color: #1d4ed8; text-decoration: none; font-weight: 600;">Contract Analyser App</a>
-            to run your analysis.
-          </p>
-
-          <p style="font-size: 14px; color: #111827; margin: 0 0 24px;">I built this app purely for demonstration purposes.</p>
-
-          <p style="font-size: 14px; color: #111827; margin: 0;">Best,<br/>Marco Costa</p>
-
-        </div>
-      `
-    })
-
-    return NextResponse.json({ success: true })
-
-  } catch (error) {
-    console.error('Error requesting access:', error)
-    return NextResponse.json({ error: 'Internal error. Please try again.' }, { status: 500 })
-  }
-}
-"""
-
-analisar_path = r"C:\Projetos\contract-analyser\src\app\api\analisar\route.ts"
-analisar_content = r"""import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import Anthropic from '@anthropic-ai/sdk'
-import { Resend } from 'resend'
-import { jsPDF } from 'jspdf'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-const resend = new Resend(process.env.RESEND_API_KEY)
-
-function generateAnalysisPdf(analysisText: string, generatedDate: string): Buffer {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-  const pageWidth = 210
-  const margin = 22
-  const contentWidth = pageWidth - margin * 2
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://contract-analyser.vercel.app'
-  const footerY = 278
-
-  let y = 20
-
-  const addPage = () => { doc.addPage(); y = 20 }
-  const checkPageBreak = (needed: number) => { if (y + needed > 262) addPage() }
-
-  const cleanText = (text: string) =>
-    text
-      .replace(/\u26a0\ufe0f/g, '[!]')
-      .replace(/\u26a0/g, '[!]')
-      .replace(/[\u{1F7E2}\u{1F7E1}\u{1F534}]/gu, '')
-
-  const stripBold = (text: string) => text.replace(/\*\*/g, '')
-
-  const drawFooter = () => {
-    const total = doc.getNumberOfPages()
-    for (let p = 1; p <= total; p++) {
-      doc.setPage(p)
-      if (p === total) {
-        doc.setDrawColor(229, 231, 235)
-        doc.line(margin, footerY - 10, pageWidth - margin, footerY - 10)
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(7)
-        doc.setTextColor(156, 163, 175)
-        doc.text('Disclaimer:', margin, footerY - 6)
-        doc.setFont('helvetica', 'normal')
-        const disclaimer = 'This analysis is generated by AI for informational purposes only. It does not constitute legal advice and should not be relied upon as a substitute for consultation with a qualified lawyer.'
-        const dLines = doc.splitTextToSize(disclaimer, contentWidth - 20)
-        doc.text(dLines, margin + 20, footerY - 6)
-        const builtY = footerY - 6 + dLines.length * 3.2 + 3.5
-        const prefix = 'Built by Marco Costa  \u00b7  For portfolio demonstration purposes  \u00b7  '
-        const linkLabel = 'Privacy Policy'
-        const totalWidth = doc.getTextWidth(prefix + linkLabel)
-        const startX = (pageWidth - totalWidth) / 2
-        doc.setTextColor(156, 163, 175)
-        doc.text(prefix, startX, builtY)
-        doc.setTextColor(29, 78, 216)
-        doc.textWithLink(linkLabel, startX + doc.getTextWidth(prefix), builtY, { url: `${appUrl}/privacy-policy` })
-      }
-    }
-  }
-
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(14)
-  doc.setTextColor(17, 24, 39)
-  doc.text('CONTRACT ANALYSER APP', pageWidth / 2, y, { align: 'center' })
-  y += 6
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(8.5)
-  doc.setTextColor(107, 114, 128)
-  doc.text(`Analysis Report  \u00b7  Generated on ${generatedDate}`, pageWidth / 2, y, { align: 'center' })
-  y += 7
-  doc.setDrawColor(229, 231, 235)
-  doc.line(margin, y, pageWidth - margin, y)
-  y += 8
-
-  const lines = cleanText(analysisText).split('\n')
-
-  for (const raw of lines) {
-    const line = raw.trim()
-    if (line === '') { y += 2; continue }
-    if (line === '---') {
-      checkPageBreak(6)
-      doc.setDrawColor(243, 244, 246)
-      doc.line(margin, y, pageWidth - margin, y)
-      y += 5; continue
-    }
-    if (line.startsWith('## ')) {
-      const text = line.replace(/^## /, '').toUpperCase()
-      checkPageBreak(12); y += 3
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(29, 78, 216)
-      doc.text(text, margin, y); y += 1.5
-      doc.setDrawColor(219, 234, 254); doc.line(margin, y, pageWidth - margin, y); y += 5; continue
-    }
-    if (line.startsWith('# ')) {
-      const text = stripBold(line.replace(/^# /, ''))
-      checkPageBreak(10)
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(17, 24, 39)
-      const wrapped = doc.splitTextToSize(text, contentWidth)
-      doc.text(wrapped, margin, y); y += wrapped.length * 5.5 + 3; continue
-    }
-    if (line.startsWith('- ')) {
-      const text = line.replace(/^- /, '')
-      checkPageBreak(6)
-      if (text.startsWith('[!]')) {
+# O Claude devolve "⚠ [!] texto" — o cleanText converte ⚠ em [!]
+# resultando em "[!] [!] texto". Corrigir para remover [!] duplicado depois de Alert:
+old = r"""      if (text.startsWith('[!]')) {
         const alertLabel = '[!] Alert:'
-        const rest = text.replace(/^\[!\]\s*\*?\*?Alert:\*?\*?\s*/i, '').replace(/\*\*/g, '').trim()
-        const fullText = `${alertLabel}  ${rest}`
-        const wrapped = doc.splitTextToSize(fullText, contentWidth - 5)
-        doc.setFontSize(8.5)
-        const labelWidth = doc.getTextWidth(alertLabel + '  ')
-        doc.setFont('helvetica', 'bold'); doc.setTextColor(234, 88, 12)
-        doc.text(alertLabel, margin + 5, y)
-        doc.setFont('helvetica', 'normal'); doc.setTextColor(55, 65, 81)
-        doc.text(wrapped[0].replace(alertLabel + '  ', ''), margin + 5 + labelWidth, y)
-        for (let wl = 1; wl < wrapped.length; wl++) { y += 4.5; doc.text(wrapped[wl], margin + 5, y) }
-        y += 5; continue
-      }
-      doc.setFontSize(8.5); doc.setTextColor(55, 65, 81)
-      doc.text('\u2022', margin, y)
-      const plainText = stripBold(text)
-      const wrapped = doc.splitTextToSize(plainText, contentWidth - 5)
-      if (text.includes('**')) {
-        const parts = text.split(/\*\*/)
-        let x = margin + 5
-        for (let p = 0; p < parts.length; p++) {
-          if (!parts[p]) continue
-          doc.setFont('helvetica', p % 2 === 1 ? 'bold' : 'normal')
-          const w = doc.getTextWidth(parts[p])
-          if (x + w > pageWidth - margin) break
-          doc.text(parts[p], x, y); x += w
-        }
-        if (wrapped.length > 1) {
-          for (let wl = 1; wl < wrapped.length; wl++) { y += 4.5; doc.setFont('helvetica', 'normal'); doc.text(wrapped[wl], margin + 5, y) }
-        }
-      } else {
-        doc.setFont('helvetica', 'normal'); doc.text(wrapped, margin + 5, y)
-      }
-      y += wrapped.length * 4.5 + 1; continue
-    }
-    if (line.startsWith('**') && line.endsWith('**') && line.length > 4) {
-      const text = stripBold(line)
-      checkPageBreak(7)
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(17, 24, 39)
-      const wrapped = doc.splitTextToSize(text, contentWidth)
-      doc.text(wrapped, margin, y); y += wrapped.length * 5 + 2; continue
-    }
-    if (line.startsWith('**')) {
-      checkPageBreak(7); doc.setFontSize(9); doc.setTextColor(17, 24, 39)
-      const parts = line.split(/\*\*/)
-      let x = margin
-      for (let p = 0; p < parts.length; p++) {
-        if (!parts[p]) continue
-        doc.setFont('helvetica', p % 2 === 1 ? 'bold' : 'normal')
-        if (x + doc.getTextWidth(parts[p]) > pageWidth - margin) break
-        doc.text(parts[p], x, y); x += doc.getTextWidth(parts[p])
-      }
-      const plain = doc.splitTextToSize(stripBold(line), contentWidth)
-      if (plain.length > 1) {
-        for (let wl = 1; wl < plain.length; wl++) { y += 5; doc.setFont('helvetica', 'normal'); doc.text(plain[wl], margin, y) }
-      }
-      y += 5.5; continue
-    }
-    checkPageBreak(6)
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(55, 65, 81)
-    const wrapped = doc.splitTextToSize(line, contentWidth)
-    doc.text(wrapped, margin, y); y += wrapped.length * 4.5 + 1
-  }
+        const rest = text.replace(/^\[!\]\s*\*?\*?Alert:\*?\*?\s*/i, '').replace(/\*\*/g, '').trim()"""
 
-  drawFooter()
-  return Buffer.from(doc.output('arraybuffer'))
-}
+new = r"""      if (text.startsWith('[!]')) {
+        const alertLabel = '[!] Alert:'
+        // Remove qualquer prefixo [!] extra e asteriscos, ficando só com o texto limpo
+        const rest = text.replace(/^\[!\]\s*/i, '').replace(/^\*?\*?Alert:\*?\*?\s*/i, '').replace(/^\[!\]\s*/i, '').replace(/\*\*/g, '').trim()"""
 
-function generateTechSheetPdf(): Buffer {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-  const pageWidth = 210
-  const margin = 22
-  const contentWidth = pageWidth - margin * 2
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://contract-analyser.vercel.app'
+content = content.replace(old, new)
 
-  let y = 24
-
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(17, 24, 39)
-  doc.text('CONTRACT ANALYSER APP', pageWidth / 2, y, { align: 'center' }); y += 6
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(107, 114, 128)
-  doc.text('Technical Overview  \u00b7  Built by Marco Costa', pageWidth / 2, y, { align: 'center' }); y += 7
-  doc.setDrawColor(229, 231, 235); doc.line(margin, y, pageWidth - margin, y); y += 8
-
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(75, 85, 99)
-  const desc = 'A full-stack web application that allows users to upload contract PDFs and receive a structured legal analysis generated by AI. Built as a portfolio demonstration of legal engineering and software development skills.'
-  const descLines = doc.splitTextToSize(desc, contentWidth)
-  doc.text(descLines, margin, y); y += descLines.length * 4.5 + 8
-
-  const section = (title: string) => {
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(29, 78, 216)
-    doc.text(title.toUpperCase(), margin, y); y += 1.5
-    doc.setDrawColor(219, 234, 254); doc.line(margin, y, pageWidth - margin, y); y += 5
-  }
-
-  const item = (label: string, detail: string) => {
-    const colLabel = 52
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(17, 24, 39)
-    doc.text(label, margin, y)
-    doc.setFont('helvetica', 'normal'); doc.setTextColor(75, 85, 99)
-    const detailLines = doc.splitTextToSize(detail, contentWidth - colLabel)
-    doc.text(detailLines, margin + colLabel, y); y += detailLines.length * 4.5 + 1.5
-  }
-
-  section('Frontend')
-  item('Next.js 14', 'React framework with App Router, Server Components and API Routes')
-  item('TypeScript', 'Typed JavaScript for reliability and maintainability')
-  item('Tailwind CSS', 'Utility-first CSS framework for responsive design')
-  item('React Markdown', 'Renders structured markdown output from Claude API')
-  y += 4
-
-  section('Backend & API')
-  item('Next.js API Routes', 'Server-side endpoints for analysis, access control and email dispatch')
-  item('Anthropic Claude API', 'claude-opus-4-5 \u2014 native PDF reading, structured legal analysis')
-  item('Resend', 'Transactional email delivery (access code + analysis PDF)')
-  item('jsPDF', 'Server-side PDF generation for analysis report and technical sheet')
-  y += 4
-
-  section('Infrastructure & Data')
-  item('Vercel', 'Deployment platform with serverless functions and daily cron job')
-  item('Supabase', 'PostgreSQL database (access codes, analyses) and file storage (PDFs)')
-  item('Supabase Storage', 'Secure private bucket for uploaded contract PDFs (max 20 MB)')
-  y += 4
-
-  section('Key Features')
-  const features = [
-    'Access control via professional email + one-time code',
-    'Email domain validation \u2014 blocks personal email providers',
-    'Native PDF reading by Claude (no intermediate text extraction)',
-    'Structured legal analysis across 8 sections',
-    'Automatic PDF generation and email delivery to user',
-    'Usage limits enforced per access code',
-    'Automated data retention: analyses deleted after 3 days, codes after 30 days',
-    'Admin panel with usage tracking and CSV export',
-  ]
-  for (const f of features) {
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(55, 65, 81)
-    doc.text('\u2022', margin, y)
-    const wrapped = doc.splitTextToSize(f, contentWidth - 5)
-    doc.text(wrapped, margin + 5, y); y += wrapped.length * 4.5 + 1
-  }
-  y += 4
-
-  doc.setDrawColor(229, 231, 235); doc.line(margin, y, pageWidth - margin, y); y += 5
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(156, 163, 175)
-  doc.text('Built by Marco Costa  \u00b7  Legal Engineer  \u00b7  For portfolio demonstration purposes', pageWidth / 2, y, { align: 'center' }); y += 4
-  doc.setTextColor(29, 78, 216)
-  doc.textWithLink(appUrl, pageWidth / 2, y, { url: appUrl, align: 'center' } as any)
-
-  return Buffer.from(doc.output('arraybuffer'))
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData()
-    const file = formData.get('file') as File
-    const code = formData.get('code') as string
-    const email = formData.get('email') as string
-    const company = formData.get('company') as string
-
-    if (!file || !code) {
-      return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
-    }
-    if (file.type !== 'application/pdf') {
-      return NextResponse.json({ error: 'Please upload a PDF file.' }, { status: 400 })
-    }
-    if (file.size > 20 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File size exceeds 20MB limit.' }, { status: 400 })
-    }
-
-    const { data, error: codeError } = await supabaseAdmin
-      .from('access_codes')
-      .select('*')
-      .eq('code', code.toUpperCase().trim())
-      .eq('is_active', true)
-      .single()
-
-    if (codeError || !data) {
-      return NextResponse.json({ error: 'Invalid access code.' }, { status: 403 })
-    }
-    if (data.analysis_count >= 1) {
-      return NextResponse.json({ error: 'limit_reached' }, { status: 403 })
-    }
-
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    const base64Pdf = buffer.toString('base64')
-
-    const message = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 3000,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'document',
-              source: { type: 'base64', media_type: 'application/pdf', data: base64Pdf },
-            },
-            {
-              type: 'text',
-              text: `You are a senior attorney at a top-tier international law firm. Analyse the attached contract and produce a structured legal report.
-
-STRICT FORMATTING RULES \u2014 follow exactly:
-- Start the report with: **Legal report:** [contract title in plain text, not bold]
-- NEVER use markdown tables. Tables are forbidden.
-- Use bullet points (starting with -) for ALL lists and structured content.
-- The only emoji allowed throughout the report is \u26a0\ufe0f for flags and warnings.
-- In section 7 only, use a single small circle: \ud83d\udfe2 for low, \ud83d\udfe1 for medium, \ud83d\udd34 for high \u2014 followed by normal text (no caps lock).
-- No other emojis anywhere.
-- All section headings in sentence case (not caps lock).
-- Consistent font size throughout \u2014 no oversized headings.
-- Be concise, precise, and legally rigorous.
-
----
-
-## Executive summary
-
-- **Contract type:** [type]
-- **Parties:** [Party A] / [Party B]
-- **Purpose:** [one sentence]
-- **Duration:** [dates]
-- **Value:** [amount if applicable]
-- **Overall risk:** [low / medium / high] \u2014 [one sentence justification]
-
----
-
-## 1. Parties involved
-
-- **[Party name]** \u2014 [legal status], [role], [NIF/registration if present]
-- **[Party name]** \u2014 [legal status], [role], [NIF/registration if present]
-- \u26a0\ufe0f [Flag any missing or unclear identification]
-
----
-
-## 2. Main obligations
-
-**[Party A]:**
-- [obligation]
-- [obligation]
-
-**[Party B]:**
-- [obligation]
-- [obligation]
-
-- \u26a0\ufe0f [Flag any critical gaps in obligations]
-
----
-
-## 3. Termination clauses
-
-- **Trigger:** [condition]
-- **Notice period:** [duration]
-- **Cure period:** [duration]
-- **Effect:** [retroactive / non-retroactive]
-- \u26a0\ufe0f **Missing provisions:** [list gaps]
-- \u26a0\ufe0f **Undefined terms:** [flag any vague trigger language]
-
----
-
-## 4. Liability
-
-- **Liability cap:** [present / absent]
-- **Consequential damages exclusion:** [present / absent]
-- **Indemnification:** [present / absent]
-- **Insurance requirements:** [present / absent]
-- \u26a0\ufe0f **Critical gaps:** [list]
-
----
-
-## 5. Risk register
-
-**High \u2014 requires immediate attention before signing:**
-- [Issue] \u2014 [one-line impact]
-
-**Medium \u2014 should be negotiated:**
-- [Issue] \u2014 [one-line impact]
-
-**Low \u2014 minor points:**
-- [Issue] \u2014 [one-line impact]
-
----
-
-## 6. Key dates and deadlines
-
-- **Execution date:** [date]
-- **Start date:** [date]
-- **End date:** [date]
-- **Payment dates:** [specified / not specified]
-- **Notice periods:** [duration]
-- **Auto-renewal:** [present / absent]
-- \u26a0\ufe0f **Missing deadlines:** [list]
-
----
-
-## 7. Overall risk assessment
-
-\ud83d\udfe2 Low / \ud83d\udfe1 Medium / \ud83d\udd34 High
-
-- [Justification point 1]
-- [Justification point 2]
-- [Justification point 3]
-
----
-
-## 8. Recommended improvements
-
-- **[Issue]:** [specific recommended clause language or action]
-- **[Issue]:** [specific recommended clause language or action]`
-            }
-          ]
-        }
-      ]
-    })
-
-    const analysisResult = message.content[0].type === 'text'
-      ? message.content[0].text
-      : 'Analysis could not be completed.'
-
-    const generatedDate = new Date().toLocaleString('en-GB')
-
-    const analysisPdfBuffer = generateAnalysisPdf(analysisResult, generatedDate)
-    const techSheetBuffer = generateTechSheetPdf()
-
-    const fileName = `${code}-${Date.now()}.pdf`
-    await supabaseAdmin.storage
-      .from('contracts')
-      .upload(fileName, buffer, { contentType: 'application/pdf', upsert: false })
-
-    await supabaseAdmin
-      .from('access_codes')
-      .update({ analysis_count: data.analysis_count + 1, last_accessed_at: new Date().toISOString() })
-      .eq('code', code.toUpperCase().trim())
-
-    await supabaseAdmin
-      .from('analyses')
-      .insert({
-        access_code: code.toUpperCase().trim(),
-        email,
-        company,
-        contract_text: '',
-        analysis_result: analysisResult,
-      })
-
-    if (email) {
-      await resend.emails.send({
-        from: 'Contract Analyser <contractanalyzer@lawper.pt>',
-        to: email,
-        subject: 'Your contract analysis',
-        attachments: [
-          { filename: 'contract-analysis.pdf', content: analysisPdfBuffer.toString('base64') },
-          { filename: 'app-tech-stack.pdf', content: techSheetBuffer.toString('base64') },
-        ],
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 24px;">
-
-            <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">Hi,</p>
-
-            <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">Please find your contract analysis report attached to this email as a PDF.</p>
-
-            <p style="font-size: 14px; color: #111827; margin: 0 0 32px;">I have also included a one-page technical overview of the application, in case you find it relevant.</p>
-
-            <p style="font-size: 14px; color: #111827; margin: 0 0 24px;">Best,<br/>Marco Costa</p>
-
-            <div style="border-top: 1px solid #e5e7eb; padding-top: 16px;">
-              <p style="font-size: 11px; color: #9ca3af; margin: 0; line-height: 1.6;">
-                <span style="font-weight: 700; color: #6b7280;">Disclaimer:</span> This analysis is generated by AI for informational purposes only. It does not constitute legal advice and should not be relied upon as a substitute for consultation with a qualified lawyer.
-              </p>
-            </div>
-
-          </div>
-        `
-      })
-    }
-
-    await resend.emails.send({
-      from: 'Contract Analyser <contractanalyzer@lawper.pt>',
-      to: process.env.OPERATOR_EMAIL!,
-      subject: `New analysis - ${company || 'Unknown'} (${email})`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <h2 style="color: #1d4ed8;">New Contract Analysis</h2>
-          <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold; width: 30%;">Email</td><td style="padding: 8px;">${email}</td></tr>
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold;">Company</td><td style="padding: 8px;">${company}</td></tr>
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold;">Date</td><td style="padding: 8px;">${generatedDate}</td></tr>
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold;">Code</td><td style="padding: 8px;">${code}</td></tr>
-          </table>
-          <p style="color: #6b7280; font-size: 12px; margin-top: 24px;">Contract Analyser &middot; Marco Costa</p>
-        </div>
-      `
-    })
-
-    return NextResponse.json({ success: true, analysis: analysisResult })
-
-  } catch (error) {
-    console.error('Error analysing contract:', error)
-    return NextResponse.json({ error: 'Internal error. Please try again.' }, { status: 500 })
-  }
-}
-"""
-
-files = {
-    solicitar_path: solicitar_content,
-    analisar_path: analisar_content,
-}
-
-for path, content in files.items():
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'w', encoding='utf-8') as f:
-        f.write(content)
-    print(f"OK: {path}")
+with open(route_path, 'w', encoding='utf-8') as f:
+    f.write(content)
+print(f"OK: {route_path}")
 
 print("\nFix concluido. Dois ficheiros actualizados.")
+print("\nNOTA: Vai ao Vercel -> Settings -> Environment Variables")
+print("e verifica se NEXT_PUBLIC_APP_URL esta definido como o URL real da app (nao localhost).")

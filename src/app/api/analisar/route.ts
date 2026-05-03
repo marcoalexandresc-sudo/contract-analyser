@@ -100,7 +100,8 @@ function generateAnalysisPdf(analysisText: string, generatedDate: string): Buffe
       checkPageBreak(6)
       if (text.startsWith('[!]')) {
         const alertLabel = '[!] Alert:'
-        const rest = text.replace(/^\[!\]\s*\*?\*?Alert:\*?\*?\s*/i, '').replace(/\*\*/g, '').trim()
+        // Remove qualquer prefixo [!] extra e asteriscos, ficando só com o texto limpo
+        const rest = text.replace(/^\[!\]\s*/i, '').replace(/^\*?\*?Alert:\*?\*?\s*/i, '').replace(/^\[!\]\s*/i, '').replace(/\*\*/g, '').trim()
         const fullText = `${alertLabel}  ${rest}`
         const wrapped = doc.splitTextToSize(fullText, contentWidth - 5)
         doc.setFontSize(8.5)
