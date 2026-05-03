@@ -195,24 +195,24 @@ export default function Analisar() {
             </div>
 
             {/* Markdown rendered result */}
-            <div className="prose prose-sm max-w-none text-gray-700" style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px', lineHeight: '1.7' }}>
+            <div style={{ fontFamily: "'Georgia', 'Times New Roman', serif", fontSize: '13px', lineHeight: '1.8', color: '#1a1a2e' }}>
               <ReactMarkdown
                 components={{
-                  h1: ({children}) => <h1 className="text-xl font-bold text-gray-900 mt-6 mb-3">{children}</h1>,
-                  h2: ({children}) => <h2 className="text-base font-bold text-blue-800 mt-6 mb-2 pb-1 border-b border-blue-100">{children}</h2>,
-                  h3: ({children}) => <h3 className="text-sm font-bold text-gray-800 mt-4 mb-2">{children}</h3>,
-                  p: ({children}) => <p className="text-gray-700 mb-3 leading-relaxed">{children}</p>,
-                  ul: ({children}) => <ul className="list-disc list-inside mb-3 space-y-1 text-gray-700">{children}</ul>,
-                  ol: ({children}) => <ol className="list-decimal list-inside mb-3 space-y-1 text-gray-700">{children}</ol>,
-                  li: ({children}) => <li className="text-gray-700">{children}</li>,
-                  strong: ({children}) => <strong className="font-semibold text-gray-900">{children}</strong>,
-                  table: ({children}) => <div className="overflow-x-auto mb-4"><table className="min-w-full border border-gray-200 rounded-lg text-xs">{children}</table></div>,
-                  thead: ({children}) => <thead className="bg-gray-50">{children}</thead>,
-                  th: ({children}) => <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b border-gray-200">{children}</th>,
-                  td: ({children}) => <td className="px-3 py-2 text-gray-600 border-b border-gray-100">{children}</td>,
-                  hr: () => <hr className="my-6 border-gray-200" />,
-                  blockquote: ({children}) => <blockquote className="border-l-4 border-blue-200 pl-4 italic text-gray-600 my-3">{children}</blockquote>,
-                  code: ({children}) => <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+                  h1: ({children}) => <h1 style={{ fontSize: '15px', fontWeight: '700', color: '#1a1a2e', marginTop: '28px', marginBottom: '12px', letterSpacing: '0.01em', fontFamily: 'Arial, sans-serif' }}>{children}</h1>,
+                  h2: ({children}) => <h2 style={{ fontSize: '11px', fontWeight: '700', color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '32px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '1px solid #e5e7eb', fontFamily: 'Arial, sans-serif' }}>{children}</h2>,
+                  h3: ({children}) => <h3 style={{ fontSize: '12px', fontWeight: '600', color: '#374151', marginTop: '16px', marginBottom: '6px', fontFamily: 'Arial, sans-serif' }}>{children}</h3>,
+                  p: ({children}) => <p style={{ fontSize: '13px', color: '#374151', marginBottom: '10px', lineHeight: '1.7' }}>{children}</p>,
+                  ul: ({children}) => <ul style={{ marginBottom: '12px', paddingLeft: '0', listStyle: 'none' }}>{children}</ul>,
+                  ol: ({children}) => <ol style={{ marginBottom: '12px', paddingLeft: '16px' }}>{children}</ol>,
+                  li: ({children}) => <li style={{ fontSize: '13px', color: '#374151', marginBottom: '5px', paddingLeft: '12px', borderLeft: '2px solid #e5e7eb', lineHeight: '1.6' }}>{children}</li>,
+                  strong: ({children}) => <strong style={{ fontWeight: '600', color: '#111827' }}>{children}</strong>,
+                  table: ({children}) => <div style={{ overflowX: 'auto', marginBottom: '16px' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>{children}</table></div>,
+                  thead: ({children}) => <thead style={{ backgroundColor: '#f8fafc' }}>{children}</thead>,
+                  th: ({children}) => <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: '600', color: '#374151', borderBottom: '1px solid #e5e7eb', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{children}</th>,
+                  td: ({children}) => <td style={{ padding: '8px 12px', color: '#4b5563', borderBottom: '1px solid #f3f4f6', verticalAlign: 'top' }}>{children}</td>,
+                  hr: () => <hr style={{ margin: '24px 0', borderColor: '#f3f4f6' }} />,
+                  blockquote: ({children}) => <blockquote style={{ borderLeft: '3px solid #1d4ed8', paddingLeft: '16px', color: '#6b7280', fontStyle: 'italic', margin: '12px 0' }}>{children}</blockquote>,
+                  code: ({children}) => <code style={{ backgroundColor: '#f3f4f6', padding: '1px 4px', borderRadius: '3px', fontSize: '11px', fontFamily: 'monospace' }}>{children}</code>,
                 }}
               >
                 {analysis}
