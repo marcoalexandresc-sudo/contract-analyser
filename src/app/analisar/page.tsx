@@ -84,13 +84,12 @@ export default function Analisar() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-1">
+          <Link href="/" className="inline-flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm tracking-wide">CA</span>
             </div>
             <span className="text-xl font-bold text-gray-900">Contract Analyser</span>
-          </div>
-          <p className="text-gray-400 text-xs mt-1">AI-powered</p>
+          </Link>
         </div>
 
         {/* Upload area */}
@@ -155,7 +154,7 @@ export default function Analisar() {
               }`}>
                 {error === 'limit_reached' ? (
                   <span>
-                    Hi, I&apos;ve limited this to 1 analysis per visit. 😄 If you&apos;d like to see more, you know where to reach me!
+                    Hi, I&apos;ve limited this to 1 analysis per visit. \ud83d\ude04 If you&apos;d like to see more, you know where to reach me!
                     <br /><br />
                     Best,<br />Marco Costa
                   </span>
