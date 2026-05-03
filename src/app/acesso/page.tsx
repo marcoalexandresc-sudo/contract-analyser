@@ -66,7 +66,7 @@ export default function Acesso() {
           </button>
         </div>
         <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-          <p className="text-xs text-gray-400">Built by Marco Costa</p>
+          <p className="text-xs text-gray-400">Built by Marco Costa &middot; For portfolio demonstration purposes</p>
           <Link href="/privacy-policy" className="text-xs text-gray-400 hover:text-gray-600 underline">Privacy Policy</Link>
         </div>
       </div>
