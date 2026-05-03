@@ -54,35 +54,36 @@ export async function POST(request: NextRequest) {
     await resend.emails.send({
       from: 'Contract Analyser <contractanalyzer@lawper.pt>',
       to: email,
-      subject: 'Your access code \u2014 Contract Analyser',
+      subject: 'Your access code',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 20px;">
-          
-          <h2 style="color: #1d4ed8; margin-bottom: 24px;">Contract Analyser</h2>
-          
-          <p>Hi,</p>
-          <p>Here is your access code:</p>
-          
-          <div style="background: #f3f4f6; padding: 24px; border-radius: 8px; text-align: center; margin: 24px 0;">
-            <span style="font-size: 36px; font-weight: bold; letter-spacing: 6px; color: #1d4ed8;">
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 24px;">
+
+          <p style="font-size: 15px; color: #111827; margin: 0 0 24px;">Hi,</p>
+
+          <p style="font-size: 14px; color: #374151; margin: 0 0 20px;">
+            Here is your access code.
+          </p>
+
+          <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 24px; text-align: center; margin: 0 0 20px; display: inline-block; width: 100%; box-sizing: border-box;">
+            <span style="font-size: 22px; font-weight: 700; letter-spacing: 5px; color: #1d4ed8; font-family: 'Courier New', monospace;">
               ${code}
             </span>
           </div>
-          
-          <p>
-            Enter this code at 
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/acesso" style="color: #1d4ed8;">
-              Contract Analyser
-            </a>
+
+          <p style="font-size: 14px; color: #374151; margin: 0 0 32px;">
+            Enter this code at
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/acesso" style="color: #1d4ed8; text-decoration: none; font-weight: 600;">Contract Analyser App</a>
+            to run your analysis.
           </p>
-          
-          <p style="color: #6b7280; font-size: 14px; margin-top: 16px;">
-            Try as many analyses as you like \u2014 see what happens when you reach the limit.
+
+          <p style="font-size: 13px; color: #6b7280; margin: 0 0 32px; border-top: 1px solid #f3f4f6; padding-top: 20px;">
+            I built this app purely for demonstration purposes.
           </p>
-          
-          <br/>
-          <p>Best,<br/>Marco Costa</p>
-          
+
+          <p style="font-size: 14px; color: #374151; margin: 0;">
+            Best,<br/>Marco Costa
+          </p>
+
         </div>
       `
     })
