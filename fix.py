@@ -1,242 +1,68 @@
-path = r"C:\Projetos\contract-analyser\src\app\api\analisar\route.ts"
+path = r"C:\Projetos\contract-analyser\src\app\analisar\page.tsx"
 
-content = r"""import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import Anthropic from '@anthropic-ai/sdk'
-import { Resend } from 'resend'
+with open(path, 'r', encoding='utf-8') as f:
+    content = f.read()
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-const resend = new Resend(process.env.RESEND_API_KEY)
+# Fix 1: subtitle
+old1 = "AI-powered contract analysis &middot; Powered by Anthropic Claude"
+new1 = "AI-powered contract analysis &middot; Built by Marco Costa &middot; For portfolio demonstration purposes"
 
-export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData()
-    const file = formData.get('file') as File
-    const code = formData.get('code') as string
-    const email = formData.get('email') as string
-    const company = formData.get('company') as string
+# Fix 2: header title
+old2 = "Contract Analyser"
+new2 = "Contract Analyser App"
 
-    if (!file || !code) {
-      return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 })
-    }
+# Fix 3: generated line - remove "Powered by Anthropic Claude"
+old3 = "Generated on {new Date().toLocaleString('en-GB')} &middot; Powered by Anthropic Claude"
+new3 = "Generated on {new Date().toLocaleString('en-GB')}"
 
-    if (file.type !== 'application/pdf') {
-      return NextResponse.json({ error: 'Please upload a PDF file.' }, { status: 400 })
-    }
+# Fix 4: footer - remove "This tool does not provide legal advice" and add Privacy Policy link
+old4 = """        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-400">
+            Built by Marco Costa &middot; Legal Engineer Portfolio &middot;{' '}
+            <Link href="/privacy-policy" className="underline">Privacy Policy</Link>
+          </p>
+          <p className="text-xs text-gray-300 mt-1">This tool does not provide legal advice</p>
+        </div>"""
+new4 = """        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-400">
+            Built by Marco Costa &middot; Legal Engineer Portfolio &middot;{' '}
+            <Link href="/privacy-policy" className="underline">Privacy Policy</Link>
+          </p>
+        </div>"""
 
-    if (file.size > 20 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File size exceeds 20MB limit.' }, { status: 400 })
-    }
+# Fix 5: disclaimer - remove emoji, keep bold only
+old5 = "                &#9888;&#65039; <strong>Disclaimer:</strong>"
+new5 = "                <strong>Disclaimer:</strong>"
 
-    const { data, error: codeError } = await supabaseAdmin
-      .from('access_codes')
-      .select('*')
-      .eq('code', code.toUpperCase().trim())
-      .eq('is_active', true)
-      .single()
+# Fix 6: bullets - change border-left style to disc bullets
+old6 = "                  li: ({children}) => <li style={{ fontSize: '13px', color: '#374151', marginBottom: '5px', paddingLeft: '12px', borderLeft: '2px solid #e5e7eb', lineHeight: '1.6' }}>{children}</li>,"
+new6 = "                  li: ({children}) => <li style={{ fontSize: '13px', color: '#374151', marginBottom: '5px', lineHeight: '1.6' }}>{children}</li>,"
 
-    if (codeError || !data) {
-      return NextResponse.json({ error: 'Invalid access code.' }, { status: 403 })
-    }
+old7 = "                  ul: ({children}) => <ul style={{ marginBottom: '12px', paddingLeft: '0', listStyle: 'none' }}>{children}</ul>,"
+new7 = "                  ul: ({children}) => <ul style={{ marginBottom: '12px', paddingLeft: '18px', listStyle: 'disc' }}>{children}</ul>,"
 
-    if (data.analysis_count >= 1) {
-      return NextResponse.json({ error: 'limit_reached' }, { status: 403 })
-    }
+replacements = [
+    (old1, new1),
+    (old2, new2),
+    (old3, new3),
+    (old4, new4),
+    (old5, new5),
+    (old6, new6),
+    (old7, new7),
+]
 
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    const base64Pdf = buffer.toString('base64')
-
-    const message = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 3000,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'document',
-              source: {
-                type: 'base64',
-                media_type: 'application/pdf',
-                data: base64Pdf,
-              },
-            },
-            {
-              type: 'text',
-              text: `You are a senior attorney at a top-tier international law firm. Analyse the attached contract and produce a structured legal report.
-
-STRICT FORMATTING RULES — follow exactly:
-- NEVER use markdown tables. Tables are forbidden.
-- Use bullet points (starting with -) for ALL lists and structured content.
-- The only emoji allowed throughout the report is \u26a0\ufe0f for flags and warnings.
-- In section 7 only, use a single small circle: \ud83d\udfe2 for low, \ud83d\udfe1 for medium, \ud83d\udd34 for high — followed by normal text (no caps lock).
-- No other emojis anywhere.
-- All section headings in sentence case (not caps lock).
-- Consistent font size throughout — no oversized headings.
-- Be concise, precise, and legally rigorous.
-
----
-
-## Executive summary
-
-- **Contract type:** [type]
-- **Parties:** [Party A] / [Party B]
-- **Purpose:** [one sentence]
-- **Duration:** [dates]
-- **Value:** [amount if applicable]
-- **Overall risk:** [low / medium / high] — [one sentence justification]
-
----
-
-## 1. Parties involved
-
-- **[Party name]** — [legal status], [role], [NIF/registration if present]
-- **[Party name]** — [legal status], [role], [NIF/registration if present]
-- \u26a0\ufe0f [Flag any missing or unclear identification]
-
----
-
-## 2. Main obligations
-
-**[Party A]:**
-- [obligation]
-- [obligation]
-
-**[Party B]:**
-- [obligation]
-- [obligation]
-
-- \u26a0\ufe0f [Flag any critical gaps in obligations]
-
----
-
-## 3. Termination clauses
-
-- **Trigger:** [condition]
-- **Notice period:** [duration]
-- **Cure period:** [duration]
-- **Effect:** [retroactive / non-retroactive]
-- \u26a0\ufe0f **Missing provisions:** [list gaps — force majeure, insolvency, termination for convenience, etc.]
-- \u26a0\ufe0f **Undefined terms:** [flag any vague trigger language]
-
----
-
-## 4. Liability
-
-- **Liability cap:** [present / absent — amount if present]
-- **Consequential damages exclusion:** [present / absent]
-- **Indemnification:** [present / absent]
-- **Insurance requirements:** [present / absent]
-- \u26a0\ufe0f **Critical gaps:** [list]
-
----
-
-## 5. Risk register
-
-**High — requires immediate attention before signing:**
-- [Issue] — [one-line impact]
-
-**Medium — should be negotiated:**
-- [Issue] — [one-line impact]
-
-**Low — minor points:**
-- [Issue] — [one-line impact]
-
----
-
-## 6. Key dates and deadlines
-
-- **Execution date:** [date]
-- **Start date:** [date]
-- **End date:** [date]
-- **Payment dates:** [specified / not specified]
-- **Notice periods:** [duration]
-- **Auto-renewal:** [present / absent]
-- \u26a0\ufe0f **Missing deadlines:** [list]
-
----
-
-## 7. Overall risk assessment
-
-\ud83d\udfe2 Low / \ud83d\udfe1 Medium / \ud83d\udd34 High
-
-- [Justification point 1]
-- [Justification point 2]
-- [Justification point 3]
-
----
-
-## 8. Recommended improvements
-
-- **[Issue]:** [specific recommended clause language or action]
-- **[Issue]:** [specific recommended clause language or action]
-
----
-
-\u26a0\ufe0f Disclaimer: This analysis is generated by AI for informational purposes only. It does not constitute legal advice and should not be relied upon as a substitute for consultation with a qualified lawyer.`
-            }
-          ]
-        }
-      ]
-    })
-
-    const analysisResult = message.content[0].type === 'text'
-      ? message.content[0].text
-      : 'Analysis could not be completed.'
-
-    const fileName = `${code}-${Date.now()}.pdf`
-    await supabaseAdmin.storage
-      .from('contracts')
-      .upload(fileName, buffer, { contentType: 'application/pdf', upsert: false })
-
-    await supabaseAdmin
-      .from('access_codes')
-      .update({ analysis_count: data.analysis_count + 1, last_accessed_at: new Date().toISOString() })
-      .eq('code', code.toUpperCase().trim())
-
-    await supabaseAdmin
-      .from('analyses')
-      .insert({
-        access_code: code.toUpperCase().trim(),
-        email,
-        company,
-        contract_text: '',
-        analysis_result: analysisResult,
-      })
-
-    await resend.emails.send({
-      from: 'Contract Analyser <contractanalyzer@lawper.pt>',
-      to: process.env.OPERATOR_EMAIL!,
-      subject: `New analysis - ${company || 'Unknown'} (${email})`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-          <h2 style="color: #1d4ed8;">New Contract Analysis</h2>
-          <table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold; width: 30%;">Email</td><td style="padding: 8px;">${email}</td></tr>
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold;">Company</td><td style="padding: 8px;">${company}</td></tr>
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold;">Date</td><td style="padding: 8px;">${new Date().toLocaleString('en-GB')}</td></tr>
-            <tr><td style="padding: 8px; background: #f3f4f6; font-weight: bold;">Code</td><td style="padding: 8px;">${code}</td></tr>
-          </table>
-          <h3 style="color: #1d4ed8;">Analysis Result</h3>
-          <div style="background: #f9fafb; padding: 20px; border-radius: 8px; white-space: pre-wrap; font-size: 14px; line-height: 1.6;">
-            ${analysisResult.replace(/\n/g, '<br/>')}
-          </div>
-          <p style="color: #6b7280; font-size: 12px; margin-top: 24px;">Contract Analyser &middot; Demo Application &middot; Marco Costa</p>
-        </div>
-      `
-    })
-
-    return NextResponse.json({ success: true, analysis: analysisResult })
-
-  } catch (error) {
-    console.error('Error analysing contract:', error)
-    return NextResponse.json({ error: 'Internal error. Please try again.' }, { status: 500 })
-  }
-}
-"""
+errors = []
+for old, new in replacements:
+    if old in content:
+        content = content.replace(old, new)
+    else:
+        errors.append(f"ERRO: padrao nao encontrado: {old[:60]}...")
 
 with open(path, 'w', encoding='utf-8') as f:
     f.write(content)
 
-print("analisar/route.ts reescrito com novo prompt - sem tabelas, bullets obrigatorios, emojis controlados.")
+if errors:
+    for e in errors:
+        print(e)
+else:
+    print("analisar/page.tsx actualizado com sucesso - todas as alteracoes aplicadas.")
