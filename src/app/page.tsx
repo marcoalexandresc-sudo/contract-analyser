@@ -50,19 +50,19 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10 text-center">
-          <div className="text-5xl mb-4">📬</div>
+          <div className="text-5xl mb-4">\ud83d\udce8</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-3">
             Check your inbox
           </h2>
           <p className="text-gray-500 text-sm mb-6">
-            We've sent your access code to <strong>{email}</strong>.
+            We&apos;ve sent your access code to <strong>{email}</strong>.
             Please check your inbox and follow the instructions.
           </p>
           <Link
             href="/acesso"
             className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors text-center"
           >
-            Enter Access Code →
+            Enter Access Code &rarr;
           </Link>
         </div>
       </main>
@@ -73,17 +73,15 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10">
 
-        {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
             Contract Analyser App
           </h1>
           <p className="text-gray-400 text-xs">
-            AI-powered contract analysis · Powered by Anthropic Claude
+            AI-powered contract analysis
           </p>
         </div>
 
-        {/* Form */}
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -99,7 +97,6 @@ export default function Home() {
             />
           </div>
 
-          {/* Consent */}
           <div className="flex items-start gap-3 mt-2">
             <input
               type="checkbox"
@@ -118,25 +115,22 @@ export default function Home() {
             </label>
           </div>
 
-          {/* Error */}
           {error && (
             <p className="text-red-500 text-xs">{error}</p>
           )}
 
-          {/* Submit */}
           <button
             onClick={handleSubmit}
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors mt-2"
           >
-            {loading ? 'Sending...' : 'Request Access →'}
+            {loading ? 'Sending...' : 'Request Access \u2192'}
           </button>
         </div>
 
-        {/* Footer */}
         <div className="mt-8 pt-6 border-t border-gray-100 text-center">
           <p className="text-xs text-gray-400">
-            Built by Marco Costa · Legal Engineer Portfolio
+            Built by Marco Costa &middot; For portfolio demonstration purposes
           </p>
           <p className="text-xs text-gray-300 mt-1">
             This tool does not provide legal advice
