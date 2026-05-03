@@ -76,7 +76,7 @@ export default function Home() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Contract Analyser
+            Contract Analyser App
           </h1>
           <p className="text-gray-400 text-xs">
             AI-powered contract analysis · Powered by Anthropic Claude
