@@ -51,8 +51,13 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Contract Analyser App</h1>
-          <p className="text-gray-400 text-xs">AI-powered</p>
+          <div className="inline-flex items-center gap-3 mb-1">
+            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm tracking-wide">CA</span>
+            </div>
+            <span className="text-xl font-bold text-gray-900">Contract Analyser</span>
+          </div>
+          <p className="text-gray-400 text-xs mt-1">AI-powered</p>
         </div>
         <div className="space-y-4">
           <div>

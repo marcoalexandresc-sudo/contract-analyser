@@ -58,6 +58,13 @@ export async function POST(request: NextRequest) {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 24px;">
 
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid #f3f4f6;">
+            <div style="width: 32px; height: 32px; background: #1d4ed8; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;">
+              <span style="font-family: Arial, sans-serif; font-size: 11px; font-weight: 700; color: white; letter-spacing: 1px;">CA</span>
+            </div>
+            <span style="font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; color: #111827;">Contract Analyser</span>
+          </div>
+
           <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">Hi,</p>
 
           <p style="font-size: 14px; color: #111827; margin: 0 0 16px;">Here is your access code:</p>
