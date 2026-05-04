@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown'
 export default function Analisar() {
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
   const [analysis, setAnalysis] = useState('')
   const [error, setError] = useState('')
   const [dragOver, setDragOver] = useState(false)
@@ -19,6 +20,23 @@ export default function Analisar() {
       router.push('/acesso')
     }
   }, [router])
+
+  // Loading messages que rodam durante a análise
+  const loadingMessages = [
+    'Uploading document...',
+    'Reading contract...',
+    'Analysing clauses...',
+    'Generating report...',
+    'Almost there...',
+  ]
+
+  useEffect(() => {
+    if (!loading) { setLoadingStep(0); return }
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev < loadingMessages.length - 1 ? prev + 1 : prev))
+    }, 8000)
+    return () => clearInterval(interval)
+  }, [loading])
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
@@ -39,8 +57,13 @@ export default function Analisar() {
     }
 
     setLoading(true)
+    setLoadingStep(0)
     setError('')
     setAnalysis('')
+
+    // Timeout de 180 segundos para mobile
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 180000)
 
     try {
       const code = sessionStorage.getItem('access_code')
@@ -55,9 +78,11 @@ export default function Analisar() {
 
       const res = await fetch('/api/analisar', {
         method: 'POST',
-        body: formData
+        body: formData,
+        signal: controller.signal,
       })
 
+      clearTimeout(timeoutId)
       const data = await res.json()
 
       if (!res.ok) {
@@ -71,8 +96,13 @@ export default function Analisar() {
 
       setAnalysis(data.analysis)
 
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err: any) {
+      clearTimeout(timeoutId)
+      if (err?.name === 'AbortError') {
+        setError('The analysis is taking longer than expected. Please try again on a stable connection.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -108,13 +138,15 @@ export default function Analisar() {
               onDrop={handleDrop}
               onDragOver={e => { e.preventDefault(); setDragOver(true) }}
               onDragLeave={() => setDragOver(false)}
-              onClick={() => document.getElementById('fileInput')?.click()}
-              className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-                dragOver
-                  ? 'border-blue-400 bg-blue-50'
+              onClick={() => !loading && document.getElementById('fileInput')?.click()}
+              className={`border-2 border-dashed rounded-xl p-10 text-center transition-colors ${
+                loading
+                  ? 'border-blue-200 bg-blue-50 cursor-default'
+                  : dragOver
+                  ? 'border-blue-400 bg-blue-50 cursor-pointer'
                   : file
-                  ? 'border-green-400 bg-green-50'
-                  : 'border-gray-300 hover:border-blue-400'
+                  ? 'border-green-400 bg-green-50 cursor-pointer'
+                  : 'border-gray-300 hover:border-blue-400 cursor-pointer'
               }`}
             >
               <input
@@ -122,6 +154,7 @@ export default function Analisar() {
                 type="file"
                 accept=".pdf"
                 className="hidden"
+                disabled={loading}
                 onChange={e => {
                   const selected = e.target.files?.[0]
                   if (selected) {
@@ -130,19 +163,33 @@ export default function Analisar() {
                   }
                 }}
               />
-              <p className="text-3xl mb-3">{file ? '\u2705' : '\uD83D\uDCC4'}</p>
-              {file ? (
+
+              {loading ? (
                 <div>
-                  <p className="text-green-700 font-medium text-sm">{file.name}</p>
-                  <p className="text-gray-400 text-xs mt-1">
-                    {(file.size / 1024 / 1024).toFixed(2)} MB &middot; Click to change
-                  </p>
+                  <svg className="animate-spin h-8 w-8 text-blue-500 mx-auto mb-3" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                  </svg>
+                  <p className="text-blue-700 font-medium text-sm">{loadingMessages[loadingStep]}</p>
+                  <p className="text-blue-400 text-xs mt-1">Please keep this page open</p>
                 </div>
               ) : (
-                <div>
-                  <p className="text-gray-600 font-medium text-sm">Drag your contract here</p>
-                  <p className="text-gray-400 text-xs mt-1">or click to select a PDF file (max 20MB)</p>
-                </div>
+                <>
+                  <p className="text-3xl mb-3">{file ? '\u2705' : '\uD83D\uDCC4'}</p>
+                  {file ? (
+                    <div>
+                      <p className="text-green-700 font-medium text-sm">{file.name}</p>
+                      <p className="text-gray-400 text-xs mt-1">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB &middot; Click to change
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-gray-600 font-medium text-sm">Drag your contract here</p>
+                      <p className="text-gray-400 text-xs mt-1">or click to select a PDF file (max 20MB)</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -167,15 +214,7 @@ export default function Analisar() {
               disabled={loading || !file}
               className="mt-6 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                  </svg>
-                  Analysing contract...
-                </span>
-              ) : 'Analyse Contract \u2192'}
+              {loading ? 'Analysing\u2026' : 'Analyse Contract \u2192'}
             </button>
 
           </div>
@@ -205,7 +244,6 @@ export default function Analisar() {
               </div>
             </div>
 
-            {/* Markdown rendered result */}
             <div style={{ fontFamily: "'Georgia', 'Times New Roman', serif", fontSize: '13px', lineHeight: '1.8', color: '#1a1a2e' }}>
               <ReactMarkdown
                 components={{
